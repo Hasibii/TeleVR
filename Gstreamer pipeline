@@ -1,0 +1,97 @@
+gst-launch-0.10 v4l2src device=/dev/video1 ! video/x-raw-yuv,width=320,height=240 ! videobox left=-320 border-alpha=0 ! queue ! videomixer name=mix ! ffmpegcolorspace ! xvimagesink v4l2src device=/dev/video2 ! video/x-raw-yuv,width=320,height=240 ! videobox left=0 ! queue ! mix. 
+
+//GEHT!!
+sudo gst-launch -v \
+    v4l2src device=/dev/video1 ! "image/jpeg,width=640,height=480" ! jpegdec ! "video/x-raw-yuv" ! videobox right=-640 border-alpha=0 ! videomixer name=mix ! \
+    ffmpegcolorspace ! xvimagesink \
+    v4l2src device=/dev/video2 !  "image/jpeg,width=640,height=480" ! jpegdec ! "video/x-raw-yuv" ! videobox left=-640 ! mix.
+
+sudo gst-launch \
+    v4l2src device=/dev/video1 ! "image/jpeg,width=320,height=240,framerate=30/1" ! jpegdec ! "video/x-raw-yuv" ! videobox right=-320 border-alpha=0 ! videomixer name=mix ! \
+    ffmpegcolorspace ! xvimagesink \
+    v4l2src device=/dev/video2 !  "image/jpeg,width=320,height=240,framerate=30/1" ! jpegdec ! "video/x-raw-yuv" ! videobox left=-320 ! mix.
+
+
+
+//MARS
+gst-launch-0.10 -v v4l2src ! video/x-raw-yuv,width=320,height=240 ! udpsink host=10.42.0.1 port=1234
+
+gst-launch \
+    v4l2src -v device=/dev/video0 ! "image/jpeg,width=320,height=240" ! jpegdec ! "video/x-raw-yuv" ! ffmpegcolorspace ! udpsink host=10.42.0.1 port=1234
+
+
+
+//MARS
+
+// 1 Camera
+gst-launch -v v4l2src device=/dev/video1 ! video/x-raw-yuv,width=640,height=360,framerate=30/1 ! ffmpegcolorspace ! vpuenc codec=6 ! rtph264pay ! udpsink host=192.168.1.2 port=5000
+
+
+//SIDE BY SIDE same Camera
+gst-launch -v \
+v4l2src device=/dev/video0 ! video/x-raw-yuv,width=640,height=360,framerate=30/1 \
+ ! tee name=t \
+videomixer name=mix \
+      sink_0::xpos=0   sink_0::ypos=0    sink_0::zorder=0\
+      sink_1::xpos=100   sink_1::ypos=100    sink_1::zorder=1\
+      sink_2::xpos=740 sink_2::ypos=100    sink_2::zorder=2\
+ ! ffmpegcolorspace ! vpuenc codec=6 ! rtph264pay ! udpsink host=10.42.0.1 port=5000 \
+  videotestsrc pattern="black" ! video/x-raw-yuv,width=1500,height=500 \
+ ! mix.sink_0 \
+t. ! queue ! mix.sink_1 \
+t. ! queue ! mix.sink_2
+
+//SIDE BY SIDE Verschiedene Cameras
+gst-launch \
+    v4l2src -v device=/dev/video0 ! video/x-raw-yuv,width=320,height=240,framerate=30/1 ! ffmpegcolorspace ! "video/x-raw-yuv" ! videobox right=-320 border-alpha=0 ! videomixer name=mix ! \
+    ffmpegcolorspace ! vpuenc codec=6 ! rtph264pay ! udpsink host=192.168.1.2 port=5000 \
+    v4l2src device=/dev/video1 !  video/x-raw-yuv,width=640,height=360,framerate=30/1 ! ffmpegcolorspace ! "video/x-raw-yuv" ! videobox left=-320 ! mix.
+
+//PC
+
+CAPS=application/x-rtp,media=(string)video,clock-rate=(int)90000,encoding-name=(string)H264,sprop-parameter-sets=(string)\"Z0JAHqaAoC/5UAA\\=\\,aM44gAA\\=\",payload=(int)96,ssrc=1050887936,clock-base=1040011779,seqnum-base=48616
+
+CAPS=application/x-rtp,media=(string)video,clock-rate=(int)90000,encoding-name=(string)H264,sprop-parameter-sets=(string)\"Z0JAH6aA8C/5UAA\\=\\,aM44gAA\\=\",payload=(int)96,ssrc=3356005282,clock-base=1742729164,seqnum-base=20722
+
+gst-launch udpsrc port=5000 ! $CAPS ! rtph264depay ! queue ! ffdec_h264 ! xvimagesink sync=false -v
+
+
+//SIDE BY SIDE same Camera
+gst-launch -v \
+v4l2src device=/dev/video1 ! video/x-raw-yuv,width=640,height=360\
+ ! tee name=t \
+videomixer name=mix \
+      sink_0::xpos=0   sink_0::ypos=0    sink_0::zorder=0\
+      sink_1::xpos=0   sink_1::ypos=0    sink_1::zorder=1\
+      sink_2::xpos=640 sink_2::ypos=0    sink_2::zorder=2\
+ ! ffmpegcolorspace ! xvimagesink \
+  videotestsrc pattern="black" ! video/x-raw-yuv,width=1280,height=360 \
+ ! mix.sink_0 \
+t. ! queue ! mix.sink_1 \
+v4l2src device=/dev/video2 ! video/x-raw-yuv,width=640,height=360 ! queue ! mix.sink_2
+
+v4l2src device=/dev/video1 ! video/x-raw-yuv,width=640,height=360,framerate=30/1 \
+
+
+
+
+
+
+gst-launch-1.0 -e -v udpsrc port=5001 ! application/x-rtp, payload=96 ! rtpjitterbuffer ! rtph264depay ! avdec_h264 ! ! tee name=t ! queue ! videomixer name=m sink_0::xpos=0 sink_1::xpos=640 ! fpsdisplaysink sync=false text-overlay=false t. ! queue ! m
+
+
+
+//GL shader
+glshader location=distortion.frag
+
+
+
+
+
+
+
+
+
+
+
+
