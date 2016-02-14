@@ -37,11 +37,13 @@
             this.btnRestart = new System.Windows.Forms.Button();
             this.btnStartTelemetry = new System.Windows.Forms.Button();
             this.btnStartCamera = new System.Windows.Forms.Button();
+            this.label3 = new System.Windows.Forms.Label();
+            this.tbxBitrate = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // btnStart
             // 
-            this.btnStart.Location = new System.Drawing.Point(189, 204);
+            this.btnStart.Location = new System.Drawing.Point(279, 217);
             this.btnStart.Name = "btnStart";
             this.btnStart.Size = new System.Drawing.Size(75, 23);
             this.btnStart.TabIndex = 0;
@@ -85,7 +87,7 @@
             // 
             // btnConnect
             // 
-            this.btnConnect.Location = new System.Drawing.Point(299, 70);
+            this.btnConnect.Location = new System.Drawing.Point(294, 70);
             this.btnConnect.Name = "btnConnect";
             this.btnConnect.Size = new System.Drawing.Size(75, 23);
             this.btnConnect.TabIndex = 5;
@@ -95,7 +97,7 @@
             // 
             // btnRestart
             // 
-            this.btnRestart.Location = new System.Drawing.Point(146, 125);
+            this.btnRestart.Location = new System.Drawing.Point(294, 96);
             this.btnRestart.Name = "btnRestart";
             this.btnRestart.Size = new System.Drawing.Size(75, 23);
             this.btnRestart.TabIndex = 6;
@@ -105,9 +107,9 @@
             // 
             // btnStartTelemetry
             // 
-            this.btnStartTelemetry.Location = new System.Drawing.Point(380, 70);
+            this.btnStartTelemetry.Location = new System.Drawing.Point(502, 70);
             this.btnStartTelemetry.Name = "btnStartTelemetry";
-            this.btnStartTelemetry.Size = new System.Drawing.Size(98, 23);
+            this.btnStartTelemetry.Size = new System.Drawing.Size(89, 23);
             this.btnStartTelemetry.TabIndex = 7;
             this.btnStartTelemetry.Text = "Start Telemetry";
             this.btnStartTelemetry.UseVisualStyleBackColor = true;
@@ -115,7 +117,7 @@
             // 
             // btnStartCamera
             // 
-            this.btnStartCamera.Location = new System.Drawing.Point(484, 70);
+            this.btnStartCamera.Location = new System.Drawing.Point(502, 167);
             this.btnStartCamera.Name = "btnStartCamera";
             this.btnStartCamera.Size = new System.Drawing.Size(89, 23);
             this.btnStartCamera.TabIndex = 8;
@@ -123,11 +125,30 @@
             this.btnStartCamera.UseVisualStyleBackColor = true;
             this.btnStartCamera.Click += new System.EventHandler(this.btnStartCamera_Click);
             // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(445, 141);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(40, 13);
+            this.label3.TabIndex = 10;
+            this.label3.Text = "Bitrate:";
+            // 
+            // tbxBitrate
+            // 
+            this.tbxBitrate.Location = new System.Drawing.Point(491, 141);
+            this.tbxBitrate.Name = "tbxBitrate";
+            this.tbxBitrate.Size = new System.Drawing.Size(100, 20);
+            this.tbxBitrate.TabIndex = 9;
+            this.tbxBitrate.Text = "4000000";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(625, 261);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.tbxBitrate);
             this.Controls.Add(this.btnStartCamera);
             this.Controls.Add(this.btnStartTelemetry);
             this.Controls.Add(this.btnRestart);
@@ -139,6 +160,7 @@
             this.Controls.Add(this.btnStart);
             this.Name = "MainForm";
             this.Text = "TeleVR";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -155,6 +177,8 @@
         private System.Windows.Forms.Button btnRestart;
         private System.Windows.Forms.Button btnStartTelemetry;
         private System.Windows.Forms.Button btnStartCamera;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.TextBox tbxBitrate;
     }
 }
 

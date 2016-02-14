@@ -23,6 +23,10 @@ teleVR_ServoControl::~teleVR_ServoControl() {
 	pca9685PWMReset(fd);
 }
 
+void teleVR_ServoControl::resetPWM(){
+	pca9685PWMReset(fd);
+}
+
 bool teleVR_ServoControl::init_PWM(){
 	// Setup with pinbase 300 and i2c location 0x40
 		fd = pca9685Setup(PIN_BASE, 0x40, HERTZ);

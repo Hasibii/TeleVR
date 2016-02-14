@@ -61,11 +61,9 @@ namespace TeleVRGUI
             try
             {
                 SSHConnection = new SshStream(tbxIPAddress.Text, "pi", "raspberry");
-                //Set the end of response matcher character
-                SSHConnection.Prompt = "#";
-                //Remove terminal emulation characters
-                SSHConnection.RemoveTerminalEmulationCharacters = true;
+                
                 MessageBox.Show(SSHConnection.ReadResponse());
+                
             }
             catch(Exception exc)
             {
@@ -93,13 +91,17 @@ namespace TeleVRGUI
             {
                 MessageBox.Show("Catch NO response");
             }
+
+            if (SSHConnection != null)
+                SSHConnection.Close();
         }
 
         private void btnStartTelemetry_Click(object sender, EventArgs e)
         {
             try
             {
-                SSHConnection.Write("sudo ./HelloPi&");  // Write ssh to RPI
+                SSHConnection.Write("sudo pkill RaspberryServoControl");
+                SSHConnection.Write("sudo ./RaspberryServoControl&");  // Write ssh to RPI
                 // works it in putty
                 if (SSHConnection.CanRead == true)
                 {
@@ -120,7 +122,8 @@ namespace TeleVRGUI
         {
             try
             {
-                SSHConnection.Write("sudo raspivid -t 0 -w 1280 -h 720 -fps 48 -b 2000000 -o - | gst-launch-1.0 -e -v fdsrc ! h264parse ! rtph264pay pt=96 config-interval=5 ! udpsink host=192.168.1.106 port=5000&");  // Write ssh to RPI
+                SSHConnection.Write("sudo pkill raspivid");
+                SSHConnection.Write("sudo ./1_Thread_1Camera_Gstreamer.sh 192.168.1.88 5000 " + tbxBitrate.Text + "&");  // Write ssh to RPI
                 // works it in putty
                 if (SSHConnection.CanRead == true)
                 {
@@ -136,6 +139,12 @@ namespace TeleVRGUI
             {
                 MessageBox.Show("Catch NO response");
             }
+        }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if(SSHConnection != null)
+                SSHConnection.Close();
         }
     }
 }

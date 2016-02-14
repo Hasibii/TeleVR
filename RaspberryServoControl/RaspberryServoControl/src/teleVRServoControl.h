@@ -15,6 +15,7 @@ public:
 	teleVR_ServoControl();
 	virtual ~teleVR_ServoControl();
 
+	void resetPWM();
 	bool init_PWM();
 	bool setOrientation(float Roll, float Pitch, float Yaw);
 	bool writePWM(float Angle, Axis_Servo AxisServo);
