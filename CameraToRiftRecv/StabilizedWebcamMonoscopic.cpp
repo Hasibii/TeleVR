@@ -196,13 +196,9 @@ public:
 				Mat frame;
 				cvtColor(yuv, frame, CV_YUV2BGR_IYUV);
 
-
-				Mat Left, Right;
-				Rect RLeft(0, 0, 640, 720);
-				Rect RRight(640, 0, 640, 720);
-				Left = frame(RLeft);
-				Right = frame(RRight);
-
+				printf(gst_caps_to_string(caps));
+				imshow("Test", frame);
+				waitKey(1);
 
 				captured.image = frame;
 				cv::flip(frame.clone(), captured.image, 0);
@@ -210,7 +206,6 @@ public:
 				gst_sample_unref(sample);
 				gst_buffer_unmap(buffer,&map);
 				gst_object_unref(caps);
-				//gst_sample_unref(sample);
 			}
 		}
   }

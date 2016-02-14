@@ -26,12 +26,16 @@ using namespace std;
 void error(char* msg);
 int main() {
 
-
 	teleVR_ServoControl ServoCTRL;
-	if(!ServoCTRL.init_PWM())
-		return 1;
+			if(!ServoCTRL.init_PWM())
+				return 1;
+
+	while(1){
 
 
+
+
+	// Socket initialisieren
 	int sockfd, newsockfd, portno;
 	portno = 5555;
 	socklen_t clilen;
@@ -46,6 +50,9 @@ int main() {
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_addr.s_addr = INADDR_ANY;
 	serv_addr.sin_port = htons(portno);
+
+
+
 	if (bind(sockfd, (struct sockaddr *) &serv_addr,
 		  sizeof(serv_addr)) < 0)
 		  error("ERROR on binding");
@@ -58,6 +65,7 @@ int main() {
 	  error("ERROR on accept");
 	bzero(buffer,256);
 
+
 	do{
 		n = read(newsockfd,buffer,255);
 		if (n < 0) error("ERROR reading from socket");
@@ -67,9 +75,10 @@ int main() {
 		//ServoCTRL.setOrientation(0,0,0);
 	}while(n >0);
 
-	ServoCTRL.~teleVR_ServoControl();
+	ServoCTRL.resetPWM();
 	close(newsockfd);
 	close(sockfd);
+	}
 
 	return 0;
 }

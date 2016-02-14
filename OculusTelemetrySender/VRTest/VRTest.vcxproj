@@ -14,6 +14,7 @@
     <ProjectGuid>{CAE440CB-DC2A-4311-A833-8AF22CC50D13}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>VRTest</RootNamespace>
+    <ProjectName>TeleVRTelemetrySender</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -84,7 +85,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="VRTest.cpp" />
+    <ClCompile Include="TeleVRTelemetrySender.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
