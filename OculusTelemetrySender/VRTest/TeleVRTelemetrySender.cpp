@@ -28,11 +28,12 @@ int main(int argc, char* argv[])
 			*/
 			return 1;
 		}
-		argv[1] = "192.168.1.107";
-		argv[2] = "5555";
-		string IP = argv[1];
-		int Port = atoi(argv[2]);
 
+	//Parameter auslesen
+	string IP = argv[1];
+	int Port = atoi(argv[2]);
+
+	//Console
 	HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
 	CONSOLE_SCREEN_BUFFER_INFO bufferInfo;
 	GetConsoleScreenBufferInfo(h, &bufferInfo);
@@ -41,6 +42,7 @@ int main(int argc, char* argv[])
 	SOCKET s;
 	long rc;
 	SOCKADDR_IN addr;
+	//Socket initialisieren
 	rc = startWinsock();
 	if (rc != 0)
 	{
@@ -62,12 +64,11 @@ int main(int argc, char* argv[])
 			printf("Socket erstellt!\n");
 			memset(&addr, 0, sizeof(SOCKADDR_IN)); // zuerst alles auf 0 setzten 
 			addr.sin_family = AF_INET;
-			addr.sin_port = htons(Port); // wir verwenden mal port 12345
-			//addr.sin_addr.s_addr = inet_addr("192.168.0.99"); // zielrechner ist unser eigener
-			std::wstring stemp = s2ws(IP);
+			addr.sin_port = htons(Port); 
+			std::wstring stemp = s2ws(IP); // String zu wstring konvertieren
 			LPCWSTR result = stemp.c_str();
 			InetPton(AF_INET, result, &addr.sin_addr);
-			rc = connect(s, (SOCKADDR*)&addr, sizeof(SOCKADDR));
+			rc = connect(s, (SOCKADDR*)&addr, sizeof(SOCKADDR)); //Verbinden
 			if (rc == SOCKET_ERROR)
 			{
 				printf("Fehler: connect gescheitert, fehler code: %d\n", WSAGetLastError());
@@ -80,14 +81,13 @@ int main(int argc, char* argv[])
 		}
 	}
 	
+	//Ovr Initialisierung
 	ovrResult result = ovr_Initialize(nullptr);
 	if (OVR_FAILURE(result))
 		return -1;
 	
 	
 	ovrHmd session;
-	//ovrGraphicsLuid luid;
-
 	result = ovrHmd_Create(0, &session);
 	if (OVR_FAILURE(result))
 	{
@@ -95,12 +95,10 @@ int main(int argc, char* argv[])
 		return -2;
 	}
 
-	//ovrHmdDesc desc = ovrHmd_GetHmdDesc(session);
-	//ovrSizei resolution = desc.Resolution;
-
+	//Oculus Ausrichtung resetten auf aktuelle Orientierung
 	ovrHmd_RecenterPose(session);
 	char buf[256];
-	while (true)
+	while (true) //Überträgt kontinuierlich die Pose des HMD alle 25ms
 	{
 		system("cls");
 		ovrTrackingState ts = ovrHmd_GetTrackingState(session,ovr_GetTimeInSeconds());
@@ -147,6 +145,7 @@ int startWinsock(void)
 	return WSAStartup(MAKEWORD(2, 0), &wsa);
 }
 
+//Konvertiert string zu wstring
 std::wstring s2ws(const std::string& s)
 {
 	int len;

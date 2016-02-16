@@ -22,12 +22,14 @@ struct CaptureData {
   cv::Mat image;
 };
 
+
+//Übernimmt das Empfangen des Kamerastreams und stellt die Bilder zur Verfügung
 class WebcamHandler {
 
 private:
 
   bool hasFrame{ false };
-  bool stopped{ false };
+  bool stopped{ false }; 
   cv::VideoCapture videoCapture;
   std::thread captureThread;
   std::mutex mutex;
@@ -49,14 +51,14 @@ public:
 	  // setup pipeline
 	  pipeline = gst_pipeline_new("pipeline");
 
-	  videosrc = gst_element_factory_make("udpsrc", "source");
-	  g_object_set(G_OBJECT(videosrc), "port", 5000, NULL);
+	  videosrc = gst_element_factory_make("udpsrc", "source"); //UDPsrc als Source
+	  g_object_set(G_OBJECT(videosrc), "port", 5000, NULL); // Setzt Port auf 5000
 	  g_object_set(G_OBJECT(videosrc), "caps", gst_caps_from_string("application/x-rtp, payload=96"), NULL);
 	  //videosrc = gst_element_factory_make("videotestsrc", "source");
 
-	  pay = gst_element_factory_make("rtph264depay", "pay");
+	  pay = gst_element_factory_make("rtph264depay", "pay"); // Fügt die RTP Pakete wirder zusammen
 
-	  dec = gst_element_factory_make("avdec_h264", "dec");
+	  dec = gst_element_factory_make("avdec_h264", "dec"); //h264 Decoder
 
 	  conv = gst_element_factory_make("videoconvert", "conv");
 
@@ -72,10 +74,6 @@ public:
 		  return -1;
 	  }
 	  g_print("Pipeline erstellt\n");
-	  //if (!pipeline || !videosrc || !pay || !dec || !conv || !sink) {
-	  //	g_printerr("Not all elements could be created.\n");
-	  //	return -1;
-	  //}
 
 	  /* get sink */
 	  GstElement *sink = gst_bin_get_by_name(GST_BIN(pipeline), "sink");
@@ -99,29 +97,29 @@ public:
 	  gst_element_set_state(pipeline, GST_STATE_PLAYING);
 	  float aspect;
 	  bool gotFrame = false;
-	  while (!gotFrame)
-	  if (!gst_app_sink_is_eos(appsink1)){
-		  GstSample *sample = gst_app_sink_pull_sample(appsink1);
-		  GstCaps *caps = gst_sample_get_caps(sample);
-		  GstBuffer *buffer = gst_sample_get_buffer(sample);
-		  const GstStructure *info = gst_sample_get_info(sample);
+	  while (!gotFrame) //Empfang 1 Bild um Informationen zu erhalten
+		  if (!gst_app_sink_is_eos(appsink1)){
+			  GstSample *sample = gst_app_sink_pull_sample(appsink1);
+			  GstCaps *caps = gst_sample_get_caps(sample);
+			  GstBuffer *buffer = gst_sample_get_buffer(sample);
+			  const GstStructure *info = gst_sample_get_info(sample);
 
-		  // ---- Read frame and convert to opencv format ---------------
+			  // ---- Read frame and convert to opencv format ---------------
 
-		  GstMapInfo map;
-		  gst_buffer_map(buffer, &map, GST_MAP_READ);
+			  GstMapInfo map;
+			  gst_buffer_map(buffer, &map, GST_MAP_READ);
 
-		  Mat yuv(Size(W, H + H / 2), CV_8U, map.data); //640,480+240
-		  //printf(" got buffer: size = %d, data=0x%p\n", size, data );
+			  Mat yuv(Size(W, H + H / 2), CV_8U, map.data); //640,480+240
+			  //printf(" got buffer: size = %d, data=0x%p\n", size, data );
 
-		  Mat frame;
-		  cvtColor(yuv, frame, CV_YUV2BGR_IYUV);
+			  Mat frame;
+			  cvtColor(yuv, frame, CV_YUV2BGR_IYUV);
 
-		  aspect = (float)frame.cols / (float)frame.rows;
-		  gotFrame = true;
-	  }
+			  aspect = (float)frame.cols / (float)frame.rows;
+			  gotFrame = true;
+		  }
 
-	  captureThread = std::thread(&WebcamHandler::captureLoopGstreamer, this);
+	  captureThread = std::thread(&WebcamHandler::captureLoopGstreamer, this); //Startet einen Thread der kontinuierlich Bilder empfängt und bereitstellt
 	  return aspect;
   }
 
@@ -171,11 +169,13 @@ public:
 		  set(captured);
 	  }
   }
-	void captureLoopGstreamer() {
+	void captureLoopGstreamer() { //Empfängt kontinuierlich Bilder und stellt sie bereit
 		CaptureData captured;
 		while (!stopped) {
 			float captureTime = ovr_GetTimeInSeconds();
-			ovrTrackingState tracking = ovrHmd_GetTrackingState(hmd, captureTime);
+
+			//Orientierung der Oculus Rift lesen und zu dem Frame speichern
+			ovrTrackingState tracking = ovrHmd_GetTrackingState(hmd, captureTime); 
 			captured.pose = tracking.HeadPose.ThePose;
 
 			if (!gst_app_sink_is_eos(appsink1)){
@@ -190,13 +190,14 @@ public:
 				GstMapInfo map;
 				gst_buffer_map(buffer, &map, GST_MAP_READ);
 				
-				Mat yuv(Size(W, H + H / 2), CV_8U, map.data); //640,480+240
-				//printf(" got buffer: size = %d, data=0x%p\n", size, data );
-
+				//Gstreamer Format zu OpenCV Format konvertieren
+				Mat yuv(Size(W, H + H / 2), CV_8U, map.data); 
 				Mat frame;
 				cvtColor(yuv, frame, CV_YUV2BGR_IYUV);
 
 				printf(gst_caps_to_string(caps));
+
+				//Frame anzeigen um außerhalb des HMDs sichtbar zu sein
 				imshow("Test", frame);
 				waitKey(1);
 
@@ -230,6 +231,7 @@ public:
     captureHandler.stopCapture();
   }
 
+  //OpenGL Anwendung initialisieren
   void initGl() {
     RiftApp::initGl();
     using namespace oglplus;
@@ -243,6 +245,7 @@ public:
   }
 
   virtual void update() {
+	  //Wenn neues Bild der Kamera bereit ist dann änder die Textur zu dem neuen Bild
     if (captureHandler.get(captureData)) {
       using namespace oglplus;
       Context::Bound(TextureTarget::_2D, *texture)
